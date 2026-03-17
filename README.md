@@ -23,8 +23,8 @@ An AI-powered internship tracking and career assistant platform that helps stude
 
 1. **Clone the repo**:
    ```bash
-   git clone https://github.com/Rahul227-cse/InternHire-Smart-Internship-Assisstant.git
-   cd InternHire-Smart-Internship-Assisstant
+   git clone https://github.com/Rahul227-cse/InternHire-Smart-Internship-Assistant.git
+   cd InternHire-Smart-Internship-Assistant
    ```
 
 2. **Create a virtual environment**:
