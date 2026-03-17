@@ -5,3 +5,4 @@ Flask-Bcrypt==1.0.1
 Flask-WTF==1.2.1
 email-validator==2.1.0.post1
 pdfplumber==0.11.9
+gunicorn==21.2.0
