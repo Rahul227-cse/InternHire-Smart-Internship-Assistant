@@ -28,7 +28,8 @@ from routes import routes as routes_bp
 app.register_blueprint(auth_bp)
 app.register_blueprint(routes_bp)
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
