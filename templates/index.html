@@ -290,6 +290,22 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(99, 102, 241, 0.2);
         }
 
+        /* Enhanced Glassmorphism for Dark Mode Only */
+        html:not([data-theme="light"]) .bento-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        html:not([data-theme="light"]) .bento-card:hover {
+            background: rgba(255, 255, 255, 0.09);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.15);
+            transform: translateY(-6px);
+        }
+
         .bento-card i {
             position: relative;
             top: 0;
