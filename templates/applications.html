@@ -106,6 +106,8 @@
   {% endfor %}
 </div>
 
+<p class="kanban-hint">← Swipe to see all columns →</p>
+
 <style>
 .kanban-board {
   display: grid;
@@ -113,6 +115,67 @@
   gap: 20px;
   overflow-x: auto;
   padding-bottom: 20px;
+}
+
+.kanban-hint {
+  display: none;
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.4;
+  margin-top: 8px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  /* Horizontal scroll Kanban */
+  .kanban-board {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    gap: 12px !important;
+    padding: 0 4px 16px !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .kanban-board::-webkit-scrollbar { height: 4px; }
+  .kanban-board::-webkit-scrollbar-track { background: transparent; }
+  .kanban-board::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+  .kanban-board::after { content: ''; min-width: 4px; flex-shrink: 0; }
+
+  /* Each column: fixed width, scrollable vertically */
+  .kanban-column {
+    min-width: 260px !important;
+    max-width: 260px !important;
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+    min-height: auto !important;
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+    border-radius: 12px !important;
+  }
+
+  /* Column header sticky */
+  .kanban-header {
+    padding: 10px 14px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1 !important;
+    background: inherit;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .kanban-header h4 { font-size: 13px !important; }
+
+  /* Cards compact */
+  .kanban-card {
+    padding: 10px 12px !important;
+    margin-bottom: 8px !important;
+    border-radius: 10px !important;
+  }
+  .kanban-card select { font-size: 11px !important; padding: 4px 6px !important; }
+
+  /* Show swipe hint */
+  .kanban-hint { display: block !important; }
 }
 
 /* Base styles (fallbacks) */

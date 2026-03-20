@@ -11,6 +11,7 @@ class User(db.Model, UserMixin):
     skills = db.relationship('Skill', backref='user', lazy=True, cascade="all, delete-orphan")
     applications = db.relationship('Application', backref='user', lazy=True, cascade="all, delete-orphan")
     learning_paths = db.relationship('LearningPath', backref='user', lazy=True, cascade="all, delete-orphan")
+    interview_sessions = db.relationship('InterviewSession', backref='user', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -70,3 +71,13 @@ class LearningStepCompletion(db.Model):
 
     def __repr__(self):
         return f'<LearningStepCompletion path={self.learning_path_id} step={self.step_id} status={self.is_completed}>'
+
+class InterviewSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    target_role = db.Column(db.String(150), nullable=False)
+    questions = db.Column(db.Text, nullable=False) # JSON stored as string
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<InterviewSession {self.target_role}>'

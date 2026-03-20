@@ -12,7 +12,7 @@
   flex-direction: column;
 }
 .split-auth-card {
-  background: #1e2235;
+  background: #1a294d;
   border-radius: 20px;
   box-shadow: 0 25px 50px rgba(0,0,0,0.3);
   position: relative;
@@ -27,7 +27,7 @@
   top: 0;
   height: 100%;
   transition: all 0.6s ease-in-out;
-  background: #1e2235;
+  background: #1a294d;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -73,7 +73,7 @@
   border-radius: 0 40px 40px 0; /* curved right edge */
 }
 .overlay {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: linear-gradient(135deg, #00c8ff, #0072ff);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 0;
@@ -173,20 +173,95 @@ html[data-theme="light"] .btn-primary {
   border: none;
 }
 
-@media (max-width: 768px) {
-  .split-auth-card { min-height: 700px; display: flex; flex-direction: column; }
-  .form-container { width: 100%; height: auto; position: relative; padding: 40px 30px; }
-  .sign-in-container, .sign-up-container { left: 0; width: 100%; opacity: 1; z-index: 1; transform: translateX(0); transition: none; animation: none; }
-  .overlay-container { position: relative; width: 100%; height: 250px; left: 0; border-radius: 0; transform: translateX(0) !important; z-index: 10; order: -1; }
-  .overlay { left: 0; width: 100%; transform: translateX(0) !important; }
-  .overlay-panel { width: 100%; transform: translateX(0) !important; }
-  .overlay-left, .overlay-right { position: absolute; }
-  
-  .split-auth-card.right-panel-active .sign-in-container { display: none; }
-  .split-auth-card:not(.right-panel-active) .sign-up-container { display: none; }
-  
-  .split-auth-card.right-panel-active .overlay-right { display: none; }
-  .split-auth-card:not(.right-panel-active) .overlay-left { display: none; }
+@media (max-width: 480px) {
+  .auth-wrapper {
+    min-height: 100vh;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px;
+  }
+
+  .split-auth-card {
+    width: 100% !important;
+    max-width: 360px !important;
+    min-height: auto !important;
+    height: auto !important;
+    border-radius: 20px !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+    position: relative !important;
+  }
+
+  /* COMPLETELY HIDE the blue sliding panel on mobile */
+  .overlay-container {
+    display: none !important;
+  }
+
+  /* Both forms: reset ALL desktop positioning */
+  .form-container {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    padding: 36px 28px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    z-index: 1 !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Login page: show sign-in form, hide sign-up form */
+  .sign-in-container {
+    display: flex !important;
+  }
+  .sign-up-container {
+    display: none !important;
+  }
+
+  /* Register page: show sign-up form, hide sign-in form */
+  .split-auth-card.right-panel-active .sign-up-container {
+    display: flex !important;
+  }
+  .split-auth-card.right-panel-active .sign-in-container {
+    display: none !important;
+  }
+
+  /* Typography */
+  .auth-title { font-size: 24px !important; margin-bottom: 6px !important; }
+  .auth-sub { font-size: 13px !important; margin-bottom: 20px !important; }
+  .form-label { font-size: 11px !important; display: block !important; margin-bottom: 4px !important; }
+  .form-control { font-size: 14px !important; padding: 10px 14px !important; width: 100% !important; margin-bottom: 12px !important; }
+  .form-group { margin-bottom: 12px !important; }
+  .btn.btn-primary { width: 100% !important; padding: 12px !important; font-size: 14px !important; margin-top: 8px !important; }
+
+  /* Simple text link at bottom instead of blue panel */
+  .mobile-auth-switch {
+    text-align: center !important;
+    margin-top: 20px !important;
+    font-size: 13px !important;
+    color: var(--muted, #94a3b8) !important;
+  }
+  .mobile-auth-switch a {
+    color: #00c8ff !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+  }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00c8ff, #0072ff) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+.btn-primary:active {
+  transform: scale(0.98) !important;
 }
 </style>
 <script>
@@ -204,9 +279,9 @@ html[data-theme="light"] .btn-primary {
   <div class="form-container sign-up-container">
     <div class="split-auth-logo" style="margin-bottom: 20px;">
       <a href="/" class="auth-logo" style="text-decoration:none; color:inherit; display:flex;">
-        <div class="logo-icon" style="background: linear-gradient(135deg, #7C3AED, #4F46E5); color: white; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="graduation-cap" style="width:20px; height:20px;"></i></div>
+        <div class="logo-icon" style="background: linear-gradient(135deg, #00c8ff, #0072ff); color: white; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="graduation-cap" style="width:20px; height:20px;"></i></div>
         <div class="logo-text" style="display:flex; flex-direction:column; justify-content:center; margin-left:12px;">
-          <span class="logo-name" style="font-weight: 800; font-size: 16px; letter-spacing: -0.02em; background: linear-gradient(135deg, #a5b4fc, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">InternHire</span>
+          <span class="logo-name" style="font-weight: 800; font-size: 16px; letter-spacing: -0.02em; background: linear-gradient(135deg, #00c8ff, #7ab8e8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">InternHire</span>
           <span class="logo-sub" style="font-size: 10px; color: var(--muted2); letter-spacing: 0.1em; text-transform: uppercase;">Career Tracker</span>
         </div>
       </a>
@@ -257,9 +332,9 @@ html[data-theme="light"] .btn-primary {
   <div class="form-container sign-in-container">
     <div class="split-auth-logo" style="margin-bottom: 20px;">
       <a href="/" class="auth-logo" style="text-decoration:none; color:inherit; display:flex;">
-        <div class="logo-icon" style="background: linear-gradient(135deg, #7C3AED, #4F46E5); color: white; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="graduation-cap" style="width:20px; height:20px;"></i></div>
+        <div class="logo-icon" style="background: linear-gradient(135deg, #00c8ff, #0072ff); color: white; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="graduation-cap" style="width:20px; height:20px;"></i></div>
         <div class="logo-text" style="display:flex; flex-direction:column; justify-content:center; margin-left:12px;">
-          <span class="logo-name" style="font-weight: 800; font-size: 16px; letter-spacing: -0.02em; background: linear-gradient(135deg, #a5b4fc, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">InternHire</span>
+          <span class="logo-name" style="font-weight: 800; font-size: 16px; letter-spacing: -0.02em; background: linear-gradient(135deg, #00c8ff, #7ab8e8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">InternHire</span>
           <span class="logo-sub" style="font-size: 10px; color: var(--muted2); letter-spacing: 0.1em; text-transform: uppercase;">Career Tracker</span>
         </div>
       </a>
@@ -303,6 +378,7 @@ html[data-theme="light"] .btn-primary {
         <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:10px;">Sign In →</button>
       </form>
     {% endif %}
+    <p class="mobile-auth-switch">Don't have an account? <a href="{{ url_for('auth.register') }}">Sign Up</a></p>
   </div>
   
   <!-- Overlay Panel with Purple Gradient -->

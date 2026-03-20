@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Job Search — InternHire{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Job Search</h1>
+  <p class="subtitle">Search live internship and job listings from across the web.</p>
+</div>
+
+<div class="search-bar-wrap">
+  <form method="GET" action="/job-search" class="search-form">
+    <input type="text" name="q" value="{{ query }}" placeholder="e.g. Python intern, React developer, Data Science..." class="search-input" autofocus />
+    <button type="submit" class="btn btn-primary">Search Jobs</button>
+  </form>
+  {% if user_skills %}
+  <div class="quick-searches">
+    <span class="qs-label">Quick search:</span>
+    {% for skill in user_skills[:5] %}
+    <a href="/job-search?q={{ skill }}+intern" class="qs-tag">{{ skill }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+{% if google_url %}
+<div class="google-fallback">
+  <p>Showing results from Google Jobs for "<strong>{{ query }}</strong>"</p>
+  <a href="{{ google_url }}" target="_blank" class="btn btn-primary">View Results on Google Jobs →</a>
+</div>
+{% elif results and results.jobs %}
+<div class="results-header">
+  <span>{{ results.jobs|length }} results for "<strong>{{ query }}</strong>"</span>
+</div>
+<div class="job-grid">
+  {% for job in results.jobs %}
+  <div class="job-card">
+    <div class="job-card-header">
+      <div class="job-company-avatar">{{ job.company[0] | upper }}</div>
+      <div>
+        <h3 class="job-title">{{ job.title }}</h3>
+        <p class="job-company">{{ job.company }}</p>
+      </div>
+    </div>
+    <div class="job-meta">
+      {% if job.location %}<span class="job-meta-tag">📍 {{ job.location }}</span>{% endif %}
+      {% if job.type %}<span class="job-meta-tag">💼 {{ job.type }}</span>{% endif %}
+      {% if job.posted and job.posted != 'N/A' %}<span class="job-meta-tag">🗓 {{ job.posted }}</span>{% endif %}
+    </div>
+    {% if job.description %}
+    <p class="job-desc">{{ job.description }}</p>
+    {% endif %}
+    <a href="{{ job.link }}" target="_blank" class="btn-apply">Apply Now →</a>
+  </div>
+  {% endfor %}
+</div>
+{% elif query %}
+<div class="empty-state">
+  <p>No results found for "{{ query }}". Try a different search term.</p>
+</div>
+{% endif %}
+
+<style>
+.search-bar-wrap { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.search-form { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+.search-input { flex: 1; background: var(--bg-secondary, rgba(255,255,255,0.05)); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; font-size: 15px; color: var(--text-primary); outline: none; }
+.search-input:focus { border-color: var(--primary); }
+.quick-searches { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.qs-label { font-size: 13px; opacity: 0.5; }
+.qs-tag { font-size: 12px; padding: 4px 12px; border-radius: 999px; background: rgba(99,102,241,0.1); color: var(--primary); border: 1px solid rgba(99,102,241,0.2); text-decoration: none; transition: all 0.2s; }
+.qs-tag:hover { background: rgba(99,102,241,0.2); }
+.results-header { font-size: 14px; opacity: 0.6; margin-bottom: 1rem; }
+.job-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.job-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; transition: border-color 0.2s, transform 0.2s; }
+.job-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+.job-card-header { display: flex; gap: 0.75rem; align-items: flex-start; }
+.job-company-avatar { width: 40px; height: 40px; border-radius: 10px; background: rgba(99,102,241,0.15); color: var(--primary); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.job-title { font-size: 15px; font-weight: 600; margin: 0 0 3px; line-height: 1.3; }
+.job-company { font-size: 13px; opacity: 0.6; margin: 0; }
+.job-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.job-meta-tag { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--bg-secondary, rgba(255,255,255,0.05)); border: 1px solid var(--border); }
+.job-desc { font-size: 13px; opacity: 0.7; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.btn-apply { display: inline-block; margin-top: auto; background: var(--primary); color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; text-align: center; transition: opacity 0.2s; }
+.btn-apply:hover { opacity: 0.85; }
+.google-fallback { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; text-align: center; }
+.google-fallback p { margin-bottom: 1rem; opacity: 0.8; }
+</style>
+{% endblock %}

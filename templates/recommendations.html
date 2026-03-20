@@ -7,46 +7,53 @@
   <p class="page-sub">Roles matched to your current skill set of {{ current_user.skills|length }} skills.</p>
 </div>
 
-{% if recommendations %}
-<div class="rec-grid">
-  {% for rec in recommendations %}
-  <div class="rec-card {% if loop.first %}top{% endif %}">
-    {% if loop.first %}<div class="best-badge">Best Match</div>{% endif %}
+{% if error %}
+<div class="card" style="margin-bottom:16px; background-color:rgba(239, 68, 68, 0.1); border-color:rgba(239, 68, 68, 0.2);">
+  <div style="color:#FCA5A5; font-size:14px; font-weight:600; margin-bottom:4px;">⚠️ Error</div>
+  <div style="font-size:13px; color:var(--text-light);">{{ error }}</div>
+</div>
+{% endif %}
 
-    {% set score = rec.score | int %}
-    {% set color = '#10B981' if score >= 70 else '#F59E0B' if score >= 40 else '#EF4444' %}
-    {% set r = 28 %}
-    {% set circ = 2 * 3.14159 * r %}
+{% if result and result.recommendations %}
+{% if result.top_advice %}
+<div class="card" style="margin-bottom:16px; background:linear-gradient(145deg, rgba(124,58,237,0.1), transparent); border-color:rgba(124,58,237,0.2);">
+  <h3 class="card-title" style="color:#A78BFA; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+    <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Top Career Advice
+  </h3>
+  <p style="font-size:14px; color:var(--text-light); line-height:1.5;">{{ result.top_advice }}</p>
+</div>
+{% endif %}
+
+<div class="rec-grid">
+  {% for rec in result.recommendations %}
+  <div class="rec-card {% if loop.first %}top{% endif %}">
+    {% if loop.first %}<div class="best-badge">Top Pick</div>{% endif %}
 
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
-      <svg width="70" height="70" style="transform:rotate(-90deg);flex-shrink:0;">
-        <circle cx="35" cy="35" r="{{ r }}" fill="none" stroke="#1e2030" stroke-width="6"/>
-        <circle cx="35" cy="35" r="{{ r }}" fill="none" stroke="{{ color }}" stroke-width="6"
-          stroke-dasharray="{{ circ }}" stroke-dashoffset="{{ circ }}"
-          stroke-linecap="round"
-          class="score-ring-circle" data-score="{{ score }}"/>
-        <text x="50%" y="50%" text-anchor="middle" dy="0.35em" fill="{{ color }}"
-          font-size="13" font-weight="800" font-family="Space Mono, monospace"
-          style="transform:rotate(90deg);transform-origin:center;">
-          {{ score }}%
-        </text>
-      </svg>
       <div>
         <div class="rec-role">{{ rec.role }}</div>
-        <div class="rec-matches">{{ rec.matches }} skills matched</div>
+        <div class="rec-matches" style="color:var(--text-light); font-size:13px;">{{ rec.company_type }}</div>
       </div>
     </div>
 
-    {% if rec.missing_skills %}
-    <div class="rec-missing-label">Skills to add</div>
+    {% if rec.why_fit %}
+    <div style="font-size:13.5px; color:var(--text-light); line-height:1.5; margin-bottom:16px; padding:12px; background:rgba(255,255,255,0.03); border-radius:8px; border-left: 2px solid var(--primary);">
+      <strong style="color:#A78BFA; display:block; margin-bottom:4px;">💡 Why it's a fit:</strong> {{ rec.why_fit }}
+    </div>
+    {% endif %}
+
+    {% if rec.skills_to_highlight %}
+    <div class="rec-missing-label" style="color:var(--primary);">Skills to highlight</div>
     <div>
-      {% for s in rec.missing_skills %}
-        <span class="missing-tag">{{ s }}</span>
+      {% for s in rec.skills_to_highlight %}
+        <span class="skill-tag">{{ s }}</span>
       {% endfor %}
     </div>
-    {% else %}
-    <div style="font-size:13px;color:var(--green);margin-top:8px;">✓ You have all required skills!</div>
     {% endif %}
+
+    <div style="margin-top:16px; font-size:13px; color:var(--text-light);">
+      <strong>Where to find:</strong> {{ rec.where_to_find }}
+    </div>
 
     <div style="margin-top:16px;">
       <a href="{{ url_for('routes.job_analyzer') }}" class="btn btn-ghost btn-sm">Analyze a JD for this role →</a>
@@ -55,7 +62,7 @@
   {% endfor %}
 </div>
 
-{% else %}
+{% elif not error %}
 <div class="card">
   <div class="empty-state">
     <div class="empty-icon">⟡</div>

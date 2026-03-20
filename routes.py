@@ -3,8 +3,21 @@ from flask_login import login_required, current_user
 from extensions import db
 from models import Skill, Application, LearningPath, LearningStepCompletion
 from forms import SkillForm, ApplicationForm
+import os
+import json
+from ai_helper import analyze_job, get_recommendations, generate_interview_prep, chat_with_assistant, search_jobs_live
 
 routes = Blueprint('routes', __name__)
+
+@routes.app_template_filter('from_json')
+def from_json_filter(value):
+    import json
+    if not value:
+        return []
+    try:
+        return json.loads(value)
+    except Exception:
+        return []
 
 @routes.route('/')
 def index():
@@ -230,8 +243,9 @@ def update_application_status_kanban():
 @routes.route('/job_analyzer', methods=['GET', 'POST'])
 @login_required
 def job_analyzer():
-    from utils import extract_skills_from_jd, calculate_match_score, extract_text_from_pdf
+    from utils import extract_text_from_pdf
     analysis = None
+    error = None
     
     # Fetch user's applications for the dropdown
     user_apps = Application.query.filter_by(user_id=current_user.id).order_by(Application.created_at.desc()).all()
@@ -239,6 +253,7 @@ def job_analyzer():
 
     if request.method == 'POST':
         jd_text = request.form.get('job_description', '')
+        job_title = request.form.get('job_title', '')
         app_id = request.form.get('application_id')
         job_pdf = request.files.get('job_pdf')
         
@@ -246,6 +261,8 @@ def job_analyzer():
             selected_app = Application.query.get(app_id)
             if selected_app and selected_app.user_id != current_user.id:
                 selected_app = None # Security check
+            if selected_app:
+                job_title = f"{selected_app.company_name} - {selected_app.role}"
 
         if job_pdf and job_pdf.filename.lower().endswith('.pdf'):
             extracted_text = extract_text_from_pdf(job_pdf)
@@ -255,55 +272,67 @@ def job_analyzer():
                 flash('Could not extract text from the provided PDF. Please verify the document or paste the text directly.', 'warning')
                 
         if jd_text:
-            required_skills = extract_skills_from_jd(jd_text)
-            
-            # Get user skills
             user_skill_objs = Skill.query.filter_by(user_id=current_user.id).all()
-            user_skills = [s.name.lower() for s in user_skill_objs]
+            user_skills_list = [s.name for s in user_skill_objs]
             
-            # Calculate gap
-            matching = [s for s in required_skills if s.lower() in user_skills]
-            missing = [s for s in required_skills if s.lower() not in user_skills]
+            try:
+                analysis = analyze_job(jd_text, user_skills_list)
+                analysis['internship_name'] = job_title if job_title else "General Analysis"
+                
+                # Format learning path dynamically based on missing skills
+                missing_skills = analysis.get('missing_skills', [])
+                formatted_learning_path = []
+                for skill in missing_skills:
+                    formatted_learning_path.append(f"Research and learn the fundamentals of {skill}")
+                    formatted_learning_path.append(f"Build a small introductory project using {skill}")
+                    
+                match_score = analysis.get('match_percentage', 0)
+                
+                # Save the learning path to the database
+                company_name = selected_app.company_name if selected_app else "General"
+                role_name = selected_app.role if selected_app else job_title if job_title else "Analysis"
+                
+                new_path = LearningPath(
+                    company=company_name,
+                    role=role_name,
+                    match_score=match_score,
+                    missing_skills=json.dumps(missing_skills),
+                    learning_steps=json.dumps(formatted_learning_path),
+                    user=current_user
+                )
+                db.session.add(new_path)
+                db.session.commit()
+                
+            except Exception as e:
+                error = str(e)
             
-            from utils import generate_learning_path
-            learning_path = generate_learning_path(missing)
-            
-            match_score = calculate_match_score(user_skills, required_skills)
-            
-            analysis = {
-                'required_skills': required_skills,
-                'matching_skills': matching,
-                'missing_skills': missing,
-                'learning_path': learning_path,
-                'match_score': match_score,
-                'internship_name': f"{selected_app.company_name} – {selected_app.role}" if selected_app else "General Analysis"
-            }
-            
-            # Save the learning path to the database
-            import json
-            company_name = selected_app.company_name if selected_app else "General"
-            role_name = selected_app.role if selected_app else "Analysis"
-            
-            new_path = LearningPath(
-                company=company_name,
-                role=role_name,
-                match_score=match_score,
-                missing_skills=json.dumps(missing),
-                learning_steps=json.dumps(learning_path),
-                user=current_user
-            )
-            db.session.add(new_path)
-            db.session.commit()
-            
-    return render_template('job_analyzer.html', title='Job Analyzer', analysis=analysis, applications=user_apps)
+    return render_template('job_analyzer.html', title='Job Analyzer', result=analysis, applications=user_apps, error=error)
 
 @routes.route('/recommendations')
 @login_required
 def recommendations():
-    from utils import get_recommendations
-    user_skills = [s.name for s in Skill.query.filter_by(user_id=current_user.id).all()]
-    recs = get_recommendations(user_skills)
-    return render_template('recommendations.html', title='Recommendations', recommendations=recs)
+    user = current_user
+    user_skills_objs = Skill.query.filter_by(user_id=user.id).all()
+    user_skills = [s.name for s in user_skills_objs]
+    
+    profile = user.profile
+    target_role = profile.target_role if profile and profile.target_role else 'Any Tech Role'
+    year_of_study = profile.year_of_study if profile and profile.year_of_study else 'Unknown'
+    branch = profile.branch if profile and profile.branch else 'Unknown'
+    
+    apps = Application.query.filter_by(user_id=user.id).all()
+    past_roles = [app.role for app in apps]
+    
+    recs = []
+    error = None
+    if len(user_skills) >= 2:
+        try:
+            interests = f"Target Role: {target_role}, Branch: {branch}, Year: {year_of_study}"
+            recs = get_recommendations(user_skills, interests, past_roles)
+        except Exception as e:
+            error = str(e)
+
+    return render_template('recommendations.html', title='Recommendations', result=recs, error=error)
 
 @routes.route('/learning-path')
 @login_required
@@ -354,7 +383,7 @@ def learning_paths():
             'all_skills_added': all_skills_added
         })
         
-    return render_template('learning_paths.html', title='Learning Path', paths=parsed_paths)
+    return render_template('learning_paths.html', title='Learning Path', learning_paths=parsed_paths)
 
 @routes.route('/learning-path/delete/<int:path_id>', methods=['POST'])
 @login_required
@@ -464,3 +493,154 @@ def add_skills_from_path():
         'old_match_score': old_match_score,
         'new_readiness': new_readiness
     })
+
+@routes.route('/interview-prep', methods=['GET', 'POST'])
+@login_required
+def interview_prep():
+    from models import InterviewSession
+    if request.method == 'POST':
+        role = request.form.get('target_role', 'Software Engineer')
+        user_skills_objs = Skill.query.filter_by(user_id=current_user.id).all()
+        user_skills = [s.name for s in user_skills_objs]
+        try:
+            result = generate_interview_prep(role, user_skills)
+            if result and 'questions' in result:
+                new_session = InterviewSession(
+                    user_id=current_user.id,
+                    target_role=role,
+                    questions=json.dumps(result['questions'])
+                )
+                db.session.add(new_session)
+                db.session.commit()
+                flash('Questions generated successfully!', 'success')
+            else:
+                flash('Failed to generate questions.', 'danger')
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+        return redirect(url_for('routes.interview_prep'))
+        
+    sessions = InterviewSession.query.filter_by(user_id=current_user.id).order_by(InterviewSession.created_at.desc()).all()
+    return render_template('interview_prep.html', title='Interview Prep', sessions=sessions)
+
+@routes.route('/interview-prep/delete/<int:session_id>', methods=['POST'])
+@login_required
+def delete_interview_session(session_id):
+    from models import InterviewSession
+    session_obj = InterviewSession.query.get_or_404(session_id)
+    if session_obj.user_id == current_user.id:
+        db.session.delete(session_obj)
+        db.session.commit()
+        flash('Session deleted.', 'success')
+    else:
+        flash('Unauthorized action.', 'danger')
+    return redirect(url_for('routes.interview_prep'))
+
+@routes.route('/interview-prep/more/<int:session_id>', methods=['POST'])
+@login_required
+def more_interview_questions(session_id):
+    from models import InterviewSession
+    session_obj = InterviewSession.query.get_or_404(session_id)
+    if session_obj.user_id != current_user.id:
+        flash('Unauthorized action.', 'danger')
+        return redirect(url_for('routes.interview_prep'))
+        
+    user_skills_objs = Skill.query.filter_by(user_id=current_user.id).all()
+    user_skills = [s.name for s in user_skills_objs]
+    
+    try:
+        result = generate_interview_prep(session_obj.target_role, user_skills)
+        if result and 'questions' in result:
+            existing_questions = json.loads(session_obj.questions) if session_obj.questions else []
+            existing_questions.extend(result['questions'])
+            session_obj.questions = json.dumps(existing_questions)
+            db.session.commit()
+            flash('More questions added!', 'success')
+        else:
+            flash('Failed to generate more questions.', 'danger')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+        
+    return redirect(url_for('routes.interview_prep'))
+
+@routes.route("/chat", methods=["POST"])
+@login_required
+def chat_api():
+    data = request.get_json()
+    messages = data.get("messages", [])
+    
+    if messages:
+        last_message = messages[-1].get("content", "").lower()
+        job_search_triggers = ["find ", "search ", "looking for ", "jobs", "internships", "intern"]
+        is_job_search = any(t in last_message for t in ["job", "internship", "intern", "role"]) and any(t in last_message for t in ["find", "search", "looking", "want"])
+        if is_job_search:
+            query = last_message
+            for trigger in job_search_triggers:
+                query = query.replace(trigger, "").strip()
+            query = query.replace("for", "").strip()
+            if not query or len(query) < 3:
+                user_skills = [s.name for s in current_user.skills]
+                query = user_skills[0] + " intern" if user_skills else "software intern"
+            search_url = f"/job-search?q={query.replace(' ', '+')}"
+            return jsonify({
+                "reply": f"Opening job search for '{query}' now!",
+                "status": "ok",
+                "navigate": search_url
+            })
+
+    top_score = 0
+    paths = LearningPath.query.filter_by(user_id=current_user.id).all()
+    if paths:
+        top_score = max((p.match_score for p in paths if p.match_score), default=0)
+        
+    user_context = {
+        "name": current_user.username,
+        "skills": [s.name for s in current_user.skills],
+        "applications_count": len(current_user.applications),
+        "applications": [
+            {
+                "role": a.role,
+                "company": a.company if hasattr(a, 'company') else "Unknown",
+                "status": a.status if hasattr(a, 'status') else "Unknown",
+                "date_applied": str(a.date_applied) if hasattr(a, 'date_applied') else "Unknown"
+            }
+            for a in current_user.applications
+        ],
+        "top_match_score": 0
+    }
+    
+    try:
+        reply = chat_with_assistant(messages, user_context)
+        return jsonify({"reply": reply, "status": "ok"})
+    except Exception as e:
+        print(f"Chat route error: {e}")
+        return jsonify({"reply": "Sorry, I'm having trouble connecting right now. Please try again shortly.", "status": "error"})
+
+@routes.route("/job-search")
+@login_required
+def job_search():
+    query = request.args.get("q", "").strip()
+    user_skills = [s.name for s in current_user.skills]
+    default_query = user_skills[0] + " intern" if user_skills else "software intern"
+    results = None
+    google_url = None
+    if query:
+        results = search_jobs_live(query)
+        if results and results.get("source") == "google":
+            google_url = results.get("google_url")
+    return render_template("job_search.html",
+        title="Job Search",
+        query=query,
+        results=results,
+        google_url=google_url,
+        default_query=default_query,
+        user_skills=user_skills
+    )
+
+@routes.route("/api/job-search")
+@login_required
+def api_job_search():
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"error": "No query provided"})
+    results = search_jobs_live(query)
+    return jsonify(results)

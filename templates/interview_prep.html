@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Interview Prep — InternHire{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Interview Prep</h1>
+  <p class="page-sub">Practice for your next interview with AI-generated questions and model answers.</p>
+</div>
+
+<div class="card" style="margin-bottom: 24px;">
+  <form id="prep-form" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+      <label class="form-label">Target Role</label>
+      <input type="text" name="target_role" id="target-role" class="form-control" placeholder="e.g. Full Stack Developer Intern" required value="{{ current_user.profile.target_role if current_user.profile else '' }}">
+    </div>
+    <button type="submit" class="btn btn-primary" id="generate-btn" style="width: 100%; justify-content: center;">
+      Generate Questions →
+    </button>
+  </form>
+</div>
+
+{% if sessions %}
+  {% for session in sessions %}
+  <div class="card" style="margin-bottom: 24px; position: relative;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+      <div>
+        <h3 style="font-size:18px; font-weight:700;">{{ session.target_role }}</h3>
+        <span style="font-size:13px; color:var(--text-light);">{{ session.created_at.strftime('%b %d, %Y') }}</span>
+      </div>
+      <form method="POST" action="{{ url_for('routes.delete_interview_session', session_id=session.id) }}" style="margin:0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-ghost btn-sm lp-delete-btn" title="Delete Session" onclick="return confirm('Delete this session?')">
+            <i data-lucide="x" width="15" height="15"></i>
+        </button>
+      </form>
+    </div>
+
+    <div id="questions-list-{{ session.id }}">
+      {% for q in session.questions | from_json %}
+      <div class="card" style="margin-bottom: 16px; border-left: 3px solid var(--primary); padding: 16px; background: rgba(255,255,255,0.02);">
+        <div style="font-size: 12px; color: var(--primary); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">
+          {% if q.type == 'technical' %}
+            <span style="color: #3b82f6;">{{ q.type }}</span>
+          {% elif 'behavior' in q.type.lower() %}
+            <span style="color: #10b981;">{{ q.type }}</span>
+          {% else %}
+            <span style="color: var(--primary);">{{ q.type }}</span>
+          {% endif %}
+        </div>
+        <div style="font-size: 15px; font-weight: 500; margin-bottom: 12px; color: var(--text-color);">{{ loop.index }}. {{ q.question }}</div>
+        
+        <details>
+          <summary style="cursor: pointer; color: #A78BFA; font-weight: 600; font-size: 14px; user-select: none;">Show Answer</summary>
+          <div style="margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 8px; font-size: 14px; color: var(--text-light); line-height: 1.5;">
+            <strong style="color:var(--primary);display:block;margin-bottom:6px;">Model Answer:</strong>
+            {{ q.sample_answer | replace('\n', '<br>') | safe }}
+            <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.05); color:#A78BFA; font-size:13px;">
+              <strong>Tip:</strong> {{ q.tip }}
+            </div>
+          </div>
+        </details>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div style="margin-top:20px;">
+      <form method="POST" action="{{ url_for('routes.more_interview_questions', session_id=session.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-secondary btn-sm" onclick="this.innerHTML='Generating more...';">
+          More Questions →
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="card" style="padding:60px 40px; text-align:center;">
+    <div class="empty-state" style="padding:0;">
+      <div class="empty-icon">🎙️</div>
+      <p class="empty-text">No Interview Prep Sessions Yet</p>
+      <p class="empty-sub" style="margin-bottom:24px;">Enter a target role and generate AI questions to practice.</p>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

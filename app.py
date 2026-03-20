@@ -2,6 +2,9 @@ from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 from extensions import db, bcrypt, login_manager
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)

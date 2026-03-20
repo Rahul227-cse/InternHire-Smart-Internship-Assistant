@@ -319,6 +319,94 @@ html[data-theme="dark"] input[type="date"] {
   background: #EEF2FF;
 }
 
+/* ─── Mobile Responsiveness ────────────────────────── */
+@media (max-width: 768px) {
+  /* ── Sidebar: fixed off-screen drawer ── */
+  #sidebar, .sidebar {
+    position: fixed !important;
+    left: -300px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    z-index: 999 !important;
+    transition: left 0.3s ease !important;
+    /* Kill any ghost rendering artifacts */
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    will-change: left !important;
+    background: var(--surface) !important;
+  }
+  /* Open state */
+  #sidebar.mobile-open, .sidebar.mobile-open {
+    left: 0 !important;
+  }
+  /* Collapsed class must NOT shrink the sidebar on mobile — keep full 260px */
+  #sidebar.collapsed, .sidebar.collapsed {
+    width: 260px !important;
+    left: -300px !important;
+  }
+  /* Collapsed + open: still slide in full-width */
+  #sidebar.collapsed.mobile-open, .sidebar.collapsed.mobile-open {
+    left: 0 !important;
+  }
+  /* Un-hide nav labels + logo text that .collapsed normally hides */
+  .sidebar.collapsed .nav-label,
+  #sidebar.collapsed .nav-label {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    max-width: unset !important;
+    overflow: visible !important;
+  }
+  .sidebar.collapsed .logo-text,
+  #sidebar.collapsed .logo-text {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  /* Also show the collapse toggle button so user can see it inside sidebar */
+  .sidebar.collapsed .sidebar-toggle-inside,
+  #sidebar.collapsed .sidebar-toggle-inside {
+    display: flex !important;
+  }
+  /* Main content: full width, no margin, no blur */
+  #main-content, .main-content, .content-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  /* Show hamburger button */
+  .hamburger-btn, .hamburger {
+    display: inline-flex !important;
+  }
+  .main-content {
+    padding: 16px;
+  }
+
+  /* Grids */
+  .grid, .bento, .skill-grid, .rec-grid, .steps, .job-grid, .bento-grid, .steps-grid, .dash-grid, .form-grid-2, .form-grid-4, .kanban-board, .two-col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Dashboard stats */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Target all generic tables if any exist */
+  table, thead, tbody, th, td, tr { display: block; }
+  thead tr { display: none; }
+  td { padding: 8px; border-bottom: 1px solid var(--border); }
+  td:before { content: attr(data-label); font-weight: 600; display: block; font-size: 11px; opacity: 0.5; margin-bottom: 2px; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
 /* Light profile */
 :root[data-theme="light"] .profile-header {
   background: #FFFFFF;
@@ -1259,11 +1347,184 @@ html[data-theme="dark"] .rec-card:hover {
 .toast-title { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
 .toast-msg { font-size: 13px; color: var(--muted); }
 
-/* Responsive tweaks */
-@media (max-width: 900px) {
-  .stats-grid { grid-template-columns: repeat(2,1fr); }
-  .dash-grid, .two-col, .rec-grid { grid-template-columns: 1fr; }
+/* ══════════════════════════════════════════════════
+   COMPREHENSIVE RESPONSIVE SYSTEM
+   ══════════════════════════════════════════════════ */
+
+/* Base image safeguard */
+img, video, canvas, svg { max-width: 100%; height: auto; }
+
+/* ── Sidebar Mobile Overlay ──────────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  /* NO backdrop-filter here — it blurs the whole page */
+}
+.sidebar-overlay.open { display: block; }
+
+/* Hamburger stays hidden on desktop */
+.hamburger { display: none !important; }
+
+/* ── Tablet (769px – 1024px) ─────────────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar { width: 220px !important; }
+  .bento-grid, .rec-grid, .job-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .steps-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid, .two-col { grid-template-columns: 1fr; }
   .form-grid-4 { grid-template-columns: 1fr 1fr; }
-  .main-content { padding: 0 20px 32px 20px; }
-  .toast-container { left: 24px; right: 24px; top: auto; bottom: 24px; }
+  .main-content { padding: 0 24px 32px; }
+}
+
+/* ── Mobile (≤ 768px) ─────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Typography — fluid scaling */
+  .page-title, h1 { font-size: clamp(22px, 6vw, 36px) !important; }
+  h2 { font-size: clamp(18px, 5vw, 28px) !important; }
+  h3 { font-size: clamp(15px, 4vw, 22px) !important; }
+  p  { font-size: clamp(13px, 3.5vw, 16px); }
+
+  /* Sidebar: slide-in drawer */
+  .sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 1000 !important;
+    transition: left 0.3s ease !important;
+    width: 260px !important;
+  }
+  .sidebar.open { left: 0 !important; }
+
+  /* Hamburger button */
+  .hamburger {
+    display: flex !important;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 7px 8px;
+  }
+  .hamburger span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+  }
+
+  /* Main content full-width */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 0 16px 28px !important;
+    max-width: 100% !important;
+  }
+
+  /* Topbar: show hamburger inline */
+  .topbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 12px 0 16px !important;
+  }
+
+  /* All common grids → single column */
+  .stats-grid,
+  .dash-grid,
+  .two-col,
+  .rec-grid,
+  .bento-grid,
+  .steps-grid,
+  .form-grid-2,
+  .form-grid-4,
+  .kanban-board,
+  .profile-grid,
+  [class*="card-grid"],
+  [class*="skill-grid"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Dashboard stats: 2-col at 768, 1-col at 480 */
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Flex rows — wrap */
+  .gap-row,
+  .hero-actions,
+  .header-row {
+    flex-wrap: wrap;
+  }
+  .header-row { gap: 12px; }
+
+  /* Cards full width, reset margins */
+  .card, .stat-card, .rec-card, .lp-card {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Padding reduction on page wrappers */
+  .page-header { margin-bottom: 20px; }
+  .card { padding: 18px !important; }
+
+  /* Buttons full width */
+  .btn-primary { width: 100%; text-align: center; justify-content: center; }
+  .btn-primary.narrow { width: auto; }   /* escape hatch */
+
+  /* Search form stacks */
+  .search-form { flex-direction: column !important; }
+  .search-input { width: 100% !important; }
+  .search-form .btn { width: 100% !important; }
+
+  /* Input rows */
+  .input-row { flex-direction: column !important; }
+  .input-row .form-control, .input-row .btn { width: 100% !important; }
+
+  /* Score ring on analyzer */
+  .score-ring-wrap { flex-direction: column; align-items: center; text-align: center; }
+
+  /* Profile header stacks */
+  .profile-header { flex-direction: column; text-align: center; }
+
+  /* Tables → block cards */
+  table { display: block; overflow-x: auto; width: 100%; }
+  thead { display: none; }
+  tr { display: block; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; padding: 12px; }
+  td { display: flex; justify-content: space-between; padding: 6px 0; border: none; font-size: 13px; }
+  td::before { content: attr(data-label); font-weight: 600; opacity: 0.5; font-size: 11px; }
+
+  /* Chat bubble */
+  #chat-bubble { bottom: 16px !important; right: 16px !important; width: 46px !important; height: 46px !important; }
+  #chat-panel { width: calc(100vw - 32px) !important; right: 16px !important; bottom: 72px !important; height: 420px !important; }
+
+  /* Toast */
+  .toast-container { left: 16px; right: 16px; top: auto; bottom: 16px; }
+  .toast { min-width: unset; }
+
+  /* Flash messages */
+  .flash-container { left: 16px; right: 16px; min-width: unset; max-width: unset; }
+
+  /* Modal */
+  .modal-container { margin: 16px; max-width: calc(100vw - 32px); padding: 24px 20px; }
+
+  /* Learning path grid */
+  .lp-steps-container { padding: 4px 12px; }
+
+  /* Completion actions stack */
+  .completion-actions { flex-direction: column; }
+}
+
+/* ── Very small phones (≤ 480px) ──────────────────── */
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr !important; }
+  .card { padding: 14px !important; }
+  html { font-size: 15px; }
 }

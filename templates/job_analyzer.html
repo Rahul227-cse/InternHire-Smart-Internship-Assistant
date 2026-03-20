@@ -29,6 +29,11 @@
       {% endif %}
 
       <div class="form-group">
+        <label class="form-label">Job Title (If not linking to application)</label>
+        <input type="text" name="job_title" class="form-control" placeholder="e.g. Frontend Developer Intern" value="{{ request.form.get('job_title', '') }}">
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Upload JD as PDF (Optional)</label>
         <label class="upload-zone" for="jd-pdf" style="padding:16px;">
           <div class="upload-text" id="jd-label" style="font-size:13px;">Click to select PDF</div>
@@ -47,11 +52,18 @@
 
   <!-- Results -->
   <div>
-    {% if analysis %}
+    {% if error %}
+    <div class="card" style="margin-bottom:16px; background-color:rgba(239, 68, 68, 0.1); border-color:rgba(239, 68, 68, 0.2);">
+      <div style="color:#FCA5A5; font-size:14px; font-weight:600; margin-bottom:4px;">⚠️ Error</div>
+      <div style="font-size:13px; color:var(--text-light);">{{ error }}</div>
+    </div>
+    {% endif %}
+
+    {% if result %}
     <!-- Score -->
     <div class="card" style="margin-bottom:16px;">
       <div class="score-ring-wrap">
-        {% set score = analysis.match_score | int %}
+        {% set score = result.match_percentage | int %}
         {% set color = '#10B981' if score >= 70 else '#F59E0B' if score >= 40 else '#EF4444' %}
         {% set r = 30 %}
         {% set circ = 2 * 3.14159 * r %}
@@ -68,17 +80,33 @@
           </text>
         </svg>
         <div class="score-ring-info">
-          <h3>{% if analysis.internship_name != 'General Analysis' %}{{ analysis.internship_name }}{% else %}Match Score{% endif %}</h3>
-          <p>{{ analysis.matching_skills|length }} of {{ analysis.required_skills|length }} required skills matched</p>
+          <h3>{% if result.internship_name != 'General Analysis' %}{{ result.internship_name }}{% else %}Match Score{% endif %}</h3>
+          <p>{{ result.matched_skills|length }} skills matched</p>
         </div>
       </div>
     </div>
 
+    {% if result.role_summary %}
+    <div class="card" style="margin-bottom:16px; background-color:rgba(59, 130, 246, 0.1); border-color:rgba(59, 130, 246, 0.2);">
+      <div style="color:#93C5FD; font-size:14px; font-weight:600; margin-bottom:4px;">Role Summary</div>
+      <div style="font-size:13px; color:var(--text-light);">{{ result.role_summary }}</div>
+    </div>
+    {% endif %}
+
+    {% if result.recommendation %}
+    <div class="card" style="margin-bottom:16px; background:linear-gradient(145deg, rgba(124,58,237,0.1), transparent); border-color:rgba(124,58,237,0.2);">
+      <h3 class="card-title" style="color:#A78BFA; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+        <i data-lucide="sparkles" style="width:16px;height:16px;"></i> AI Recommendation
+      </h3>
+      <p style="font-size:14px; color:var(--text-light); line-height:1.5;">{{ result.recommendation }}</p>
+    </div>
+    {% endif %}
+
     <!-- Matching -->
     <div class="skill-match-box matching">
-      <div class="match-label">✓ Matching Skills ({{ analysis.matching_skills|length }})</div>
+      <div class="match-label">✓ Matching Skills ({{ result.matched_skills|length }})</div>
       <div>
-        {% for s in analysis.matching_skills %}
+        {% for s in result.matched_skills %}
           <span class="skill-tag">{{ s }}</span>
         {% else %}
           <span style="color:var(--muted2);font-size:13px;">None matched yet.</span>
@@ -88,9 +116,9 @@
 
     <!-- Missing -->
     <div class="skill-match-box missing">
-      <div class="match-label">✕ Missing Skills ({{ analysis.missing_skills|length }})</div>
+      <div class="match-label">✕ Missing Skills ({{ result.missing_skills|length }})</div>
       <div>
-        {% for s in analysis.missing_skills %}
+        {% for s in result.missing_skills %}
           <span class="skill-tag">{{ s }}</span>
         {% else %}
           <span style="color:var(--muted2);font-size:13px;">No gaps — great match! 🎉</span>
@@ -98,20 +126,7 @@
       </div>
     </div>
 
-    <!-- Learning Path -->
-    {% if analysis.learning_path %}
-    <div class="card" style="margin-top:16px;">
-      <h3 class="card-title">📚 Suggested Learning Path</h3>
-      {% for step in analysis.learning_path %}
-      <div class="learning-step">
-        <div class="step-num">{{ loop.index }}</div>
-        <div class="step-text">{{ step | replace('Step ' ~ loop.index ~ ': ', '') }}</div>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    {% else %}
+    {% elif not error %}
     <div class="card" style="height:100%;display:flex;align-items:center;justify-content:center;">
       <div class="empty-state">
         <div class="empty-icon">◎</div>
@@ -122,4 +137,21 @@
     {% endif %}
   </div>
 </div>
+
+<!-- Loading Overlay -->
+<div id="ai-loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:9999; flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(4px);">
+  <div style="width:40px; height:40px; border:4px solid rgba(255,255,255,0.1); border-left-color:var(--primary); border-radius:50%; animation:ai-spin 1s linear infinite;"></div>
+  <p style="margin-top:16px; font-weight:600; font-family:'Space Mono', monospace; color:white;">AI is analyzing your fit...</p>
+</div>
+
+<style>
+@keyframes ai-spin { 100% { transform:rotate(360deg); } }
+</style>
+
+<script>
+document.querySelector('form').addEventListener('submit', function() {
+    document.getElementById('ai-loading-overlay').style.display = 'flex';
+});
+</script>
+
 {% endblock %}

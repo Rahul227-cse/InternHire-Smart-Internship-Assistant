@@ -1,5 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — InternHire{% endblock %}
+
+{% block head %}
+<style>
+@media (max-width: 768px) {
+  .stats-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .stat-card {
+    padding: 14px !important;
+    min-height: auto !important;
+    height: auto !important;
+  }
+  .stat-card-icon { margin-bottom: 8px !important; }
+  .stat-card-icon svg { width: 22px !important; height: 22px !important; }
+  .stat-value { font-size: 26px !important; line-height: 1.1 !important; margin-bottom: 4px !important; }
+  .stat-label { font-size: 10px !important; letter-spacing: 0.05em !important; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="page-header">

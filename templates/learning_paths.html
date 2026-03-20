@@ -13,9 +13,9 @@
 <!-- Toast Container -->
 <div id="toast-container" class="toast-container"></div>
 
-{% if paths %}
-  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 24px;">
-    {% for path in paths %}
+{% if learning_paths %}
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+    {% for path in learning_paths %}
       <div class="card lp-card" id="lp-card-{{ path.id }}">
 
         <!-- Card Header -->
@@ -185,7 +185,7 @@
 
   // Initialize Next Step highlights on page load
   document.addEventListener("DOMContentLoaded", function() {
-    {% for path in paths %}
+    {% for path in learning_paths %}
       updateNextStepUI({{ path.id }});
       
       // Auto-show modal if already completed but skills not added

@@ -8,44 +8,46 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        /* CSS reset and base */
         :root {
-            /* Vercel-inspired Palette refined with Vibrant Midnight */
-            --bg: #0B112B;
-            --fg: #ffffff;
-            --accents-1: #121A3A;
-            --accents-2: #1D264F;
-            --accents-3: #2A3669;
-            --accents-4: #666;
-            --accents-5: #888;
-            --accents-6: #999;
-            --accents-7: #eaeaea;
-            --accents-8: #fafafa;
-            
-            --primary: #6366F1;
-            --primary-light: #818CF8;
-            --success: #0070f3;
-            --error: #ee0000;
-            --warning: #f5a623;
-            
-            --geist-foreground: #fff;
-            --geist-background: #0B112B;
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            --bg-grad-1: #1a294d;
+            --bg-grad-2: #0d1b2e;
+            --bg-grad-3: #08111e;
+            --bg: #0d1b2e;
+            --accent: #00c8ff;
+            --accent-hover: rgba(0, 200, 255, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #7f90a8;
+            --font-sans: 'Inter', sans-serif;
+            --nav-bg: rgba(13, 27, 46, 0.92);
+            --card-bg: #0f1f35;
+            --card-border: rgba(255,255,255,0.06);
+            --stats-bg: transparent;
+            --hero-badge-bg: rgba(255, 255, 255, 0.07);
+            --hero-badge-border: rgba(255, 255, 255, 0.1);
+            --cta-border: rgba(0,200,255,0.2);
+            --line-color: rgba(0,200,255,0.3);
+            --btn-hover-bg: #e0f7ff;
         }
 
         [data-theme="light"] {
+            --bg-grad-1: #fdfdfd;
+            --bg-grad-2: #ffffff;
+            --bg-grad-3: #f1f5f9;
             --bg: #ffffff;
-            --fg: #000000;
-            --accents-1: #f3f4f6;
-            --accents-2: #e5e7eb;
-            --accents-3: #d1d5db;
-            --accents-4: #9ca3af;
-            --accents-5: #6b7280;
-            --accents-6: #4b5563;
-            --accents-7: #374151;
-            --accents-8: #111827;
-            --primary: #4F46E5;
-            --geist-foreground: #000;
-            --geist-background: #fff;
+            --accent: #0072ff; /* Light blue accent */
+            --accent-hover: rgba(0, 114, 255, 0.3);
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --nav-bg: rgba(255, 255, 255, 0.6);
+            --card-bg: rgba(255, 255, 255, 0.4); /* Glass effect */
+            --card-border: rgba(255, 255, 255, 0.6);
+            --stats-bg: rgba(255, 255, 255, 0.1);
+            --hero-badge-bg: rgba(0, 114, 255, 0.05);
+            --hero-badge-border: rgba(0, 114, 255, 0.1);
+            --cta-border: rgba(0, 114, 255, 0.2);
+            --line-color: rgba(0, 114, 255, 0.3);
+            --btn-hover-bg: #0072ff;
         }
 
         * {
@@ -58,12 +60,30 @@
         body {
             font-family: var(--font-sans);
             background-color: var(--bg);
-            color: var(--fg);
+            color: var(--text-main);
             overflow-x: hidden;
-            transition: background 0.5s ease;
+            line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Mesh Gradient Background */
+        /* Background Layers */
+        .dark-mode-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            background: radial-gradient(circle at top, #1a294d 0%, #0d1b2e 50%, #08111e 100%);
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            opacity: 1;
+        }
+
+        [data-theme="light"] .dark-mode-gradient {
+            opacity: 0;
+        }
+
         .mesh-gradient {
             position: fixed;
             top: 0;
@@ -73,8 +93,13 @@
             z-index: -1;
             overflow: hidden;
             filter: blur(100px);
-            opacity: 0.5;
+            opacity: 0;
             pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        [data-theme="light"] .mesh-gradient {
+            opacity: 0.5;
         }
 
         .mesh-ball {
@@ -93,26 +118,47 @@
             100% { transform: translate(-50px, -100px) scale(0.9); }
         }
 
+        /* Typography */
+        h1, h2, h3, h4 { letter-spacing: -0.02em; }
+        
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         /* Navbar */
         .navbar {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            padding: 16px 40px;
+            padding: 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
             transition: all 0.3s ease;
-            backdrop-filter: blur(8px);
             border-bottom: 1px solid transparent;
         }
 
         .navbar.scrolled {
-            padding: 12px 40px;
-            background: rgba(var(--bg), 0.7);
-            border-bottom: 1px solid var(--accents-2);
+            padding: 16px 40px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .logo {
@@ -120,35 +166,34 @@
             align-items: center;
             gap: 12px;
             text-decoration: none;
-            color: var(--fg);
+            color: var(--text-main);
             font-weight: 700;
             font-size: 20px;
         }
 
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--fg);
-            color: var(--bg);
-            border-radius: 8px;
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .nav-actions { display: flex; align-items: center; gap: 20px; }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            color: var(--fg);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: background 0.2s;
+        .theme-toggle:hover { 
+            background: rgba(127, 144, 168, 0.2); 
         }
-
-        .theme-toggle:hover { background: var(--accents-2); }
 
         /* Buttons */
         .btn {
@@ -156,203 +201,456 @@
             align-items: center;
             justify-content: center;
             padding: 10px 24px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
             text-decoration: none;
             transition: all 0.2s ease;
             cursor: pointer;
         }
 
-        .btn-primary {
-            background: var(--fg);
+        .btn-filled {
+            background: var(--text-main);
             color: var(--bg);
-            border: 1px solid var(--fg);
+            border: 1px solid var(--text-main);
         }
 
-        .btn-primary:hover {
+        .btn-filled:hover {
+            background: var(--btn-hover-bg);
+            border-color: var(--btn-hover-bg);
+            transform: translateY(-2px);
+        }
+
+        .btn-ghost {
             background: transparent;
-            color: var(--fg);
+            color: var(--text-main);
+            border: 1px solid transparent;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
 
-        .btn-secondary {
-            color: var(--fg);
-            border: 1px solid var(--accents-2);
-        }
-
-        .btn-secondary:hover {
-            background: var(--accents-1);
-            border-color: var(--accents-3);
+        /* Ghost button border and text color shift */
+        .btn-ghost:hover {
+            color: var(--accent);
+            border-color: var(--accent);
         }
 
         /* Hero Section */
         .hero {
-            padding: 160px 24px 80px;
+            padding: 180px 24px 100px;
             text-align: center;
             max-width: 1000px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: var(--accents-2);
+            background: var(--hero-badge-bg);
             padding: 6px 16px;
             border-radius: 99px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             margin-bottom: 32px;
-            border: 1px solid var(--accents-3);
-            animation: fade-in 0.8s ease-out;
+            border: 1px solid var(--hero-badge-border);
+            color: var(--text-main);
+            animation: fadeUp 0.8s both;
+            animation-delay: 0.3s;
         }
 
         .hero h1 {
-            font-size: clamp(48px, 8vw, 92px);
+            font-size: 58px;
             font-weight: 800;
-            line-height: 1;
-            letter-spacing: -0.05em;
-            margin-bottom: 32px;
-            background: linear-gradient(180deg, var(--fg) 50%, var(--accents-5));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: hero-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            line-height: 1.15;
+            margin-bottom: 24px;
+            animation: fadeUp 0.8s both;
+            animation-delay: 0.5s;
+        }
+
+        .hero-highlight {
+            color: var(--accent);
+            display: block;
         }
 
         .hero p {
-            font-size: clamp(18px, 2vw, 22px);
-            color: var(--accents-6);
-            max-width: 700px;
-            margin: 0 auto 48px;
-            line-height: 1.5;
-            animation: fade-in 1s ease-out 0.2s forwards;
-            opacity: 0;
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            animation: fadeUp 0.8s both;
+            animation-delay: 0.7s;
         }
 
         .hero-actions {
             display: flex;
             gap: 16px;
             justify-content: center;
-            animation: fade-in 1s ease-out 0.4s forwards;
-            opacity: 0;
-        }
-
-        .hero-actions .btn { padding: 14px 32px; font-size: 16px; border-radius: 8px; }
-
-        @keyframes hero-reveal {
-            from { transform: translateY(40px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Bento Grid */
-        .section-title {
-            text-align: center;
-            font-size: 42px;
-            font-weight: 800;
-            letter-spacing: -0.04em;
             margin-bottom: 60px;
+            animation: fadeUp 0.8s both;
+            animation-delay: 0.9s;
         }
 
-        .bento-container {
-            max-width: 1200px;
-            margin: 0 auto 120px;
-            padding: 0 24px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-        }
-
-        .bento-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--accents-2);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 40px;
-            position: relative;
-            overflow: hidden;
+        .dashboard-preview {
+            width: 100%;
+            max-width: 900px;
+            height: 500px;
+            background-color: var(--card-bg);
+            background-image: url('/static/images/dashboard_preview.png');
+            background-size: cover;
+            background-position: top center;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
             display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            min-height: 300px;
-            transition: all 0.3s ease;
-        }
-
-        .bento-card:hover {
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(99, 102, 241, 0.2);
-        }
-
-        /* Enhanced Glassmorphism for Dark Mode Only */
-        html:not([data-theme="light"]) .bento-card {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: fadeUp 0.8s both;
+            animation-delay: 1.1s;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
-
-        html:not([data-theme="light"]) .bento-card:hover {
-            background: rgba(255, 255, 255, 0.09);
-            border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.15);
-            transform: translateY(-6px);
+        
+        .dashboard-preview::before {
+            content:'';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+            pointer-events: none;
         }
 
-        .bento-card i {
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--stats-bg);
+            padding: 40px 0;
+            width: 100%;
+            border-top: 1px solid var(--card-border);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .stats-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-divider {
+            width: 1px;
+            height: 40px;
+            background: var(--card-border);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 140px 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 60px;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            text-align: left;
+        }
+
+        .bento-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 40px;
+            transition: all 0.25s ease;
             position: relative;
-            top: 0;
-            left: 0;
-            width: 32px;
-            height: 32px;
-            color: var(--primary);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .bento-card:hover {
+            border-color: var(--accent-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .bento-icon {
+            font-size: 32px;
             margin-bottom: 24px;
+            display: inline-block;
         }
 
-        .bento-card h3 { font-size: 24px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; color: var(--fg); }
-        .bento-card p { color: var(--accents-5); line-height: 1.5; font-size: 15px; }
-
-        /* Unified grid items */
-        .bento-1, .bento-2, .bento-3, .bento-4 { grid-column: span 1; }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        .bento-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
         }
 
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
+        .bento-desc {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        /* Staggered transition delays for bento when scroll reveals */
+        .bento-grid .bento-card:nth-child(1) { transition-delay: 0s; }
+        .bento-grid .bento-card:nth-child(2) { transition-delay: 0.1s; }
+        .bento-grid .bento-card:nth-child(3) { transition-delay: 0.2s; }
+        .bento-grid .bento-card:nth-child(4) { transition-delay: 0.3s; }
+        /* Reset transition delay on hover so it responds immediately */
+        .bento-grid .bento-card:hover { transition-delay: 0s; }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 24px 140px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .connecting-line {
+            position: absolute;
+            top: 32px;
+            left: 16%;
+            right: 16%;
+            height: 2px;
+            background-image: linear-gradient(to right, var(--line-color) 50%, transparent 50%);
+            background-size: 16px 2px;
+            background-repeat: repeat-x;
+            z-index: 0;
+        }
+
+        .step-item {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .step-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.15);
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 0 24px 100px;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .cta-card {
+            background: var(--card-bg);
+            border: 1px solid var(--cta-border);
+            border-radius: 20px;
+            padding: 60px 40px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .cta-card h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 32px;
         }
 
         /* Footer */
         .footer {
-            padding: 80px 40px;
-            border-top: 1px solid var(--accents-2);
-            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
         }
 
-        .footer-logo { margin-bottom: 24px; justify-content: center; }
-        .footer-text { color: var(--accents-4); font-size: 14px; }
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+        }
 
-        @media (max-width: 860px) {
-            .bento-container { grid-template-columns: 1fr; grid-template-rows: auto; }
-            .bento-1, .bento-4 { grid-column: span 1; }
-            .hero h1 { font-size: 48px; }
-            .navbar { padding: 16px 20px; }
+        .footer-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-main);
+        }
+
+        .footer-copy {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 12px 16px; }
+            .btn-ghost { padding: 7px 12px; font-size: 12px; white-space: nowrap; }
+            .btn.btn-filled { padding: 7px 12px; font-size: 12px; white-space: nowrap; }
+            .theme-toggle { display: flex !important; padding: 6px; }
+            .hero { padding: 40px 16px 32px; text-align: center; }
+            .hero h1 { font-size: clamp(28px, 8vw, 48px); letter-spacing: -1px; }
+            .hero p { font-size: 15px; margin: 0 auto 24px; }
+            .hero-actions { flex-direction: column; align-items: center; gap: 10px; }
+            .dashboard-preview { display: block !important; max-height: 200px; overflow: hidden; border-radius: 12px; margin: 0 0 40px; }
+            .bento-grid, .steps-grid { grid-template-columns: 1fr !important; }
+            .connecting-line { display: none; }
+            .stats-container { flex-direction: column; gap: 32px; }
+            .stat-divider { width: 40px; height: 1px; }
+            .hero h1 { font-size: 36px !important; }
+            .footer { flex-direction: column; text-align: center; gap: 16px; padding: 20px 16px; }
+            .cta-card { padding: 36px 20px; }
+        }
+        @media (max-width: 480px) {
+          .navbar {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 12px 16px !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 999 !important;
+            background: #0d1b2e !important;
+            width: 100% !important;
+          }
+          .logo {
+            flex-shrink: 0 !important;
+            margin-right: auto !important;
+          }
+          .nav-actions {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            flex-shrink: 0 !important;
+            margin-left: auto !important;
+          }
+          .theme-toggle {
+            flex-shrink: 0 !important;
+            margin: 0 !important;
+            padding: 4px !important;
+          }
+          .hero h1 { font-size: clamp(24px, 7vw, 32px) !important; }
+          .stat-number { font-size: 28px; }
+
+          /* Light Theme Mobile Fix */
+          html[data-theme="light"] .navbar {
+            background: #f0f4ff !important;
+            border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+          }
+          html[data-theme="light"] .logo,
+          html[data-theme="light"] .nav-actions a:not(.btn-filled),
+          html[data-theme="light"] .theme-toggle,
+          html[data-theme="light"] .btn-ghost {
+            color: #1e293b !important;
+          }
+          html[data-theme="light"] .btn-filled {
+            background: #0d1b2e !important;
+            color: #ffffff !important;
+          }
+          html[data-theme="light"] .hero {
+            background: #f0f4ff !important;
+          }
+          html[data-theme="light"] .hero h1 {
+            color: #0f172a !important;
+          }
+          html[data-theme="light"] .hero p {
+            color: #475569 !important;
+          }
+          html[data-theme="light"] .hero-badge {
+            background: rgba(0,200,255,0.1) !important;
+            color: #0072ff !important;
+            border-color: rgba(0,200,255,0.3) !important;
+          }
         }
     </style>
 </head>
-<body class="landing-page">
+<body data-theme="dark">
 
+    <!-- Backgrounds -->
+    <div class="dark-mode-gradient"></div>
     <div class="mesh-gradient">
         <div class="mesh-ball ball-1"></div>
         <div class="mesh-ball ball-2"></div>
@@ -362,7 +660,7 @@
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <a href="/" class="logo">
-            <div class="logo-icon"><i data-lucide="graduation-cap" width="20" height="20"></i></div>
+            <i data-lucide="graduation-cap" width="24" height="24"></i>
             <span>InternHire</span>
         </a>
         <div class="nav-actions">
@@ -370,81 +668,143 @@
                 <i data-lucide="moon" id="moon-icon"></i>
                 <i data-lucide="sun" id="sun-icon" style="display:none;"></i>
             </button>
-            <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Login</a>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Sign Up</a>
+            <a href="{{ url_for('auth.login') }}" class="btn-ghost">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-filled">Sign Up</a>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-badge">
-            <i data-lucide="sparkles" width="14" height="14"></i>
-            <span>The AI-Powered Internship Assistant</span>
+            ✦ The AI-Powered Internship Assistant
         </div>
-        <h1>Internship search,<br>solved with AI.</h1>
+        <h1>
+            Internship search,<br>
+            <span class="hero-highlight">solved with AI.</span>
+        </h1>
         <p>Track applications, analyze skill gaps, and generate personalized learning roadmaps. All in one unified workspace.</p>
         <div class="hero-actions">
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Start Building Free</a>
-            <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Sign In</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-filled">Start Building Free</a>
+            <a href="{{ url_for('auth.login') }}" class="btn-ghost">Sign In</a>
+        </div>
+        
+        <div class="dashboard-preview"></div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="stats-bar scroll-reveal">
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number"><span class="count-up" data-target="500">0</span>+</div>
+                <div class="stat-label">Students</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-number"><span class="count-up" data-target="10000">0</span>+</div>
+                <div class="stat-label">Jobs Analyzed</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-number"><span class="count-up" data-target="95">0</span>%</div>
+                <div class="stat-label">Match Accuracy</div>
+            </div>
         </div>
     </section>
 
-    <!-- Bento Features -->
+    <!-- Features Section -->
     <section class="features">
-        <h2 class="section-title reveal">Engineered for your success.</h2>
-        <div class="bento-container">
-            <div class="bento-card bento-1 reveal">
-                <i data-lucide="layout-dashboard"></i>
-                <h3>Internship Tracker</h3>
-                <p>A high-performance command center for your entire hunt. Manage statuses, interviews, and offers with ease.</p>
+        <div class="eyebrow scroll-reveal">WHAT YOU GET</div>
+        <h2 class="section-title scroll-reveal">Engineered for the modern applicant.</h2>
+        
+        <div class="bento-grid">
+            <div class="bento-card scroll-reveal">
+                <span class="bento-icon">🗂</span>
+                <h3 class="bento-title">Internship Tracker</h3>
+                <p class="bento-desc">A high-performance command center for your entire hunt. Manage statuses, interviews, and offers with ease.</p>
             </div>
-            <div class="bento-card bento-2 reveal">
-                <i data-lucide="scan-search"></i>
-                <h3>Skill Gap Analyzer</h3>
-                <p>Compare your profile against jobs and uncover missing skills instantly.</p>
+            <div class="bento-card scroll-reveal">
+                <span class="bento-icon">🔍</span>
+                <h3 class="bento-title">Skill Gap Analyzer</h3>
+                <p class="bento-desc">Compare your profile against jobs and uncover missing skills instantly.</p>
             </div>
-            <div class="bento-card bento-3 reveal">
-                <i data-lucide="target"></i>
-                <h3>Readiness Score</h3>
-                <p>AI-driven quantification of your preparedness for any role.</p>
+            <div class="bento-card scroll-reveal">
+                <span class="bento-icon">🎯</span>
+                <h3 class="bento-title">Readiness Score</h3>
+                <p class="bento-desc">AI-driven quantification of your preparedness for any role.</p>
             </div>
-            <div class="bento-card bento-4 reveal">
-                <i data-lucide="map"></i>
-                <h3>Dynamic Learning Roadmaps</h3>
-                <p>Automatically generated, step-by-step paths to bridge your skill gaps and land that dream role.</p>
+            <div class="bento-card scroll-reveal">
+                <span class="bento-icon">🗺</span>
+                <h3 class="bento-title">Dynamic Learning Roadmaps</h3>
+                <p class="bento-desc">Automatically generated, step-by-step paths to bridge your skill gaps and land that dream role.</p>
             </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <h2 class="section-title scroll-reveal">How it works</h2>
+        <div class="steps-grid scroll-reveal">
+            <div class="connecting-line"></div>
+            <div class="step-item">
+                <div class="step-circle">1</div>
+                <h3 class="step-title">Add your skills</h3>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">2</div>
+                <h3 class="step-title">Analyze job descriptions</h3>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">3</div>
+                <h3 class="step-title">Get your roadmap</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section scroll-reveal">
+        <div class="cta-card">
+            <h2>Ready to secure your future?</h2>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-filled" style="padding: 14px 32px; font-size: 16px;">Start for Free</a>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer reveal">
-        <a href="/" class="logo footer-logo">
-            <div class="logo-icon"><i data-lucide="graduation-cap" width="16" height="16"></i></div>
+    <footer class="footer">
+        <a href="/" class="footer-logo">
+            <i data-lucide="graduation-cap" width="20" height="20"></i>
             <span>InternHire</span>
         </a>
-        <p class="footer-text">© 2026 InternHire. Built for the next generation of engineers.</p>
+        <div class="footer-links">
+            <a href="#">Features</a>
+            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('auth.register') }}">Sign Up</a>
+        </div>
+        <div class="footer-copy">
+            © 2026 InternHire. All rights reserved.
+        </div>
     </footer>
 
     <script>
         lucide.createIcons();
 
-        // Navbar Scroll Effect
+        // Navbar Scroll Blur Effect
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
-            if (window.scrollY > 20) {
+            if (window.scrollY > 60) {
                 nav.classList.add('scrolled');
             } else {
                 nav.classList.remove('scrolled');
             }
         });
 
-        // Theme Toggle
+        // Theme Toggle Logic
         const themeToggle = document.getElementById('themeToggle');
         const sunIcon = document.getElementById('sun-icon');
         const moonIcon = document.getElementById('moon-icon');
         
         function setTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
             if (theme === 'dark') {
                 sunIcon.style.display = 'block';
@@ -460,24 +820,65 @@
             setTheme(currentTheme === 'dark' ? 'light' : 'dark');
         });
 
-        // Init theme
         const savedTheme = localStorage.getItem('theme') || 'dark';
         setTheme(savedTheme);
 
-        // Scroll Reveal
-        function reveal() {
-            const reveals = document.querySelectorAll(".reveal");
-            for (let i = 0; i < reveals.length; i++) {
-                const windowHeight = window.innerHeight;
-                const elementTop = reveals[i].getBoundingClientRect().top;
-                const elementVisible = 150;
-                if (elementTop < windowHeight - elementVisible) {
-                    reveals[i].classList.add("active");
+        // Scroll Reveal Observer
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const hasAnimatedCounters = new Set(); // to prevent double animation
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    // Check if target is stats bar for counters
+                    if (entry.target.classList.contains('stats-bar') && !hasAnimatedCounters.has(entry.target)) {
+                        startCounters();
+                        hasAnimatedCounters.add(entry.target);
+                    }
                 }
-            }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Counters Animation
+        function startCounters() {
+            const counters = document.querySelectorAll('.count-up');
+            const duration = 1200; // 1.2s
+
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'), 10);
+                let startTimestamp = null;
+                
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    
+                    // Ease out expo formula for smooth decel
+                    const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                    const currentCount = Math.floor(easeProgress * target);
+                    
+                    // Format with commas
+                    counter.innerHTML = currentCount.toLocaleString();
+                    
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        counter.innerHTML = target.toLocaleString();
+                    }
+                };
+                window.requestAnimationFrame(step);
+            });
         }
-        window.addEventListener("scroll", reveal);
-         reveal(); // Initial check
     </script>
 </body>
 </html>
